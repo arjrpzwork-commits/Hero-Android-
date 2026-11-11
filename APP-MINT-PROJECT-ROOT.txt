@@ -1,0 +1,10 @@
+APP MINT PROJECT ROOT
+
+This ZIP is an Android Gradle project at its top level.
+Start the build in the directory containing settings.gradle and app/build.gradle.
+Do not import web-preview/index.html as the app; it is reference-only.
+The Android application editor is app/src/main/assets/editor/index.html.
+The Android native bridge is app/src/main/cpp/hero_runtime_jni.cpp.
+The C++ rendering engine is native-engine/hero_vid_engine/src/main.cpp.
+Gradle preBuild builds and packages the FFmpeg/FFprobe Android PIE executables.
+The final APK is incomplete unless tests/verify-android-native-executables.sh passes.

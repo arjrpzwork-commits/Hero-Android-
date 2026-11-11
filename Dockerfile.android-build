@@ -1,0 +1,29 @@
+# Reproducible Hero Vid Studios Android build environment.
+# Build: docker build -f Dockerfile.android-build -t hero-vid-android-build .
+# Run:   docker run --rm -v "$PWD:/workspace" -w /workspace hero-vid-android-build ./build-environment/scripts/build-android.sh
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive \
+    ANDROID_HOME=/opt/android-sdk \
+    ANDROID_SDK_ROOT=/opt/android-sdk \
+    ANDROID_NDK_VERSION=27.2.12479018 \
+    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+    PATH=/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/usr/local/gradle/bin:$PATH
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-17-jdk-headless curl unzip zip git ca-certificates bash gnupg xz-utils \
+    build-essential cmake ninja-build make pkg-config ffmpeg python3 nodejs npm && \
+    rm -rf /var/lib/apt/lists/*
+ARG GRADLE_VERSION=8.9
+RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip && \
+    unzip -q /tmp/gradle.zip -d /usr/local && \
+    ln -s "/usr/local/gradle-${GRADLE_VERSION}" /usr/local/gradle && rm /tmp/gradle.zip
+ARG ANDROID_CMDLINE_TOOLS=11076708
+RUN mkdir -p "$ANDROID_HOME/cmdline-tools" && \
+    curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS}_latest.zip" -o /tmp/cmdline-tools.zip && \
+    unzip -q /tmp/cmdline-tools.zip -d "$ANDROID_HOME/cmdline-tools" && \
+    mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest" && \
+    rm /tmp/cmdline-tools.zip && \
+    yes | sdkmanager --licenses >/dev/null && \
+    sdkmanager --install 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0' \
+      'ndk;27.2.12479018' 'cmake;3.22.1'
+WORKDIR /workspace
+CMD ["bash"]

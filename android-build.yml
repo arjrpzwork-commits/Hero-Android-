@@ -1,0 +1,67 @@
+name: Hero Vid Studios Android build
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app/**'
+      - 'native-engine/**'
+      - 'build-environment/**'
+      - '*.gradle'
+      - 'gradle.properties'
+      - 'tests/**'
+      - '*.md'
+      - '*.json'
+      - '.github/workflows/android-build.yml'
+jobs:
+  android-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+      - name: Install host renderer test dependencies
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg libboost-dev
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android build components
+        run: sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Run project checks
+        run: |
+          node tests/editor-runtime-smoke.cjs
+          node tests/schema-and-platform-tests.cjs
+          python3 tests/appmint-project-root-contract.py
+          python3 tests/android-package-contract.py
+          python3 tests/android-native-bootstrap-contract.py
+          node tests/android-jni-envelope-regression.cjs
+          python3 tests/direct-jni-engine-smoke.py
+          python3 tests/native-renderer-integration-smoke.py
+      - name: Build Android APKs
+        run: gradle --no-daemon clean assembleDebug assembleRelease
+      - name: Verify Android native executable packaging
+        run: bash tests/verify-android-native-executables.sh
+      - name: Publish APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hero-Vid-Studios-Android-APKs
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Package complete Android source project
+        run: mkdir -p dist && zip -qr dist/Hero-Vid-Studios-Android-0.5.14-Native-Renderer-Source.zip . -x './app/build/*' './.gradle/*' './.git/*' './dist/*'
+      - name: Publish complete Android source project
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hero-Vid-Studios-Android-0.5.14-Native-Renderer-Source
+          path: dist/Hero-Vid-Studios-Android-0.5.14-Native-Renderer-Source.zip
+          if-no-files-found: error
+          retention-days: 30

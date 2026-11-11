@@ -1,0 +1,19 @@
+FROM debian:bookworm-slim AS engine-build
+RUN apt-get update && apt-get install -y --no-install-recommends cmake g++ make libboost-dev && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY engine/ /build/
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release -j2
+
+FROM python:3.12-slim-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg ca-certificates && rm -rf /var/lib/apt/lists/* && useradd --system --uid 10001 --create-home hero
+COPY --from=engine-build /build/build/hero-native-engine /usr/local/bin/hero-native-engine
+WORKDIR /opt/hero-render
+COPY service/requirements.txt ./service/requirements.txt
+RUN pip install --no-cache-dir -r service/requirements.txt
+COPY service/ ./service/
+COPY worker/ ./worker/
+RUN mkdir -p /var/lib/hero-render && chown -R hero:hero /var/lib/hero-render /opt/hero-render
+USER hero
+ENV HERO_RENDER_DATA=/var/lib/hero-render HERO_ENGINE_BIN=/usr/local/bin/hero-native-engine
+EXPOSE 8080
+CMD ["uvicorn", "service.app:app", "--host", "0.0.0.0", "--port", "8080"]
