@@ -1,48 +1,18 @@
 {
-  "milestone": "hero-vid-studios-android-0.5.14-direct-jni-renderer-bridge-0.7.2",
-  "version_name": "0.5.14",
-  "version_code": 15,
-  "application_id": "com.webapp.herostudios",
-  "host_checks": {
-    "direct_jni_shared_library_compile": "PASS",
-    "direct_jni_media_staging_mp4_render_ffprobe": "PASS",
-    "native_multiclip_mp4_pip_color_automation_ffprobe": "PASS",
-    "native_audio_only_wav_96khz_24bit_mono_preservation": "PASS",
-    "editor_runtime_smoke": "PASS",
-    "schema_and_platform_contract": "PASS",
-    "android_package_contract": "PASS",
-    "android_native_bridge_contract": "PASS",
-    "android_jni_json_rpc_envelope_regression": "PASS",
-    "direct_jni_engine_smoke": "PASS"
-  },
-  "android_checks": {
-    "ndk_cross_compile": "NOT_RUN",
-    "gradle_apk_build": "NOT_RUN",
-    "apk_native_library_packaging": "NOT_RUN",
-    "device_installation": "NOT_RUN",
-    "device_jni_load": "NOT_RUN",
-    "device_ffmpeg_execv": "NOT_RUN",
-    "device_mp4_render": "NOT_RUN",
-    "device_audio_only_render": "NOT_RUN",
-    "update_signing_compatibility": "NOT_VERIFIED"
-  },
-  "implemented": [
-    "Android JavaScript editor calls HeroNativeRuntime through the existing Java bridge",
-    "HeroNativeRuntime invokes the C++ timeline engine directly through JNI; no Java ProcessBuilder renderer process",
-    "C++ timeline engine is linked into libhero_runtime.so by Android CMake",
-    "C++ engine owns project/source staging, timeline rendering, output probing and verification",
-    "FFmpeg and FFprobe are packaged as Android PIE executables in nativeLibraryDir and invoked by absolute path",
-    "verified output is saved through Android MediaStore",
-    "no arbitrary 25-track schema/UI cap; no forced stereo layout conversion",
-    "Android JS bridge unwraps JNI JSON-RPC result envelopes and propagates native error messages"
-  ],
-  "known_limitations": [
-    "Android NDK build, APK packaging and physical-device rendering are not yet verified",
-    "FFmpeg build profile excludes GPL/nonfree codec libraries; unavailable codecs fail explicitly",
-    "split-screen layout explicitly rejected",
-    "native render progress stream and cancellation not implemented",
-    "cloud rendering not integrated",
-    "Android FFmpeg/FFprobe PIE executables are built during the NDK build and are not prebuilt in the source ZIP; physical-device execution is not verified"
-  ],
-  "original_0_5_13_baseline_overwritten": false
+  "version": "0.1.0",
+  "cxx20_build": true,
+  "ffmpeg_offline_video_render": true,
+  "ffmpeg_offline_audio_render": true,
+  "mp4_h264_aac_smoke_test": true,
+  "wav_pcm_96khz_24bit_smoke_test": true,
+  "ffprobe_output_metadata_verification": true,
+  "exact_codec_resolution_fps_sample_rate_pcm_bit_depth_checks": true,
+  "gui_native_bridge_connected": false,
+  "progress_streaming": false,
+  "render_cancellation": false,
+  "windows_build": false,
+  "android_package": false,
+  "macos_package": false,
+  "production_ffmpeg_license_review": false,
+  "full_editor_regression": false
 }
